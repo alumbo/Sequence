@@ -2,7 +2,7 @@ var Sequence = {
   sequenceContainer: '<div id="{id}" class="sequence"></div>',
   imgPath: 'img/sequence/{id}/{index}.png',
   intervalTime: 50,
-  stoped: false,
+  paused: false,
   _sequenceList: [],
   init:function(options) {
     if(options) {
@@ -78,11 +78,31 @@ var Sequence = {
       console.error('Sequence \'' + idOrEl + '\' not found');
     }
   },
-  stopAll: function() {
-    this.stoped = true;
+  play: function(idOrEl, loops) {
+    var sequence = this.getSequenceById(idOrEl);
+    if(loops == undefined) loops = 1;
+    if(loops === true) loops = Infinity;
+    if(sequence) {
+      sequence.loops = loops;
+    }
+    else {
+      console.error('Sequence \'' + idOrEl + '\' not found');
+    }
+  },
+  stop: function(idOrEl) {
+    var sequence = this.getSequenceById(idOrEl);
+    if(sequence.loops > 0) sequence.loops = 1;
+  },
+  stopNow: function(idOrEl) {
+    var sequence = this.getSequenceById(idOrEl);
+    sequence.loops = 0;
+  },
+  pauseAll: function() {
+    this.paused = true;
   },
   resumeAll: function() {
-    this.stoped = false;
+    this.paused = false;
+    this.frame();
   },
   frame: function() {
     var sequenceIndex = 0;
@@ -99,7 +119,7 @@ var Sequence = {
         sequence.$imgs.eq(sequence.imgIndex).show();
       }
     }
-    if(!this.stoped) setTimeout($.proxy(this.frame, this), this.intervalTime);
+    if(!this.paused) setTimeout($.proxy(this.frame, this), this.intervalTime);
   },
   getSequenceById: function(idOrEl, second) {
     var id = null;
