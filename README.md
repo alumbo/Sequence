@@ -1,11 +1,13 @@
 # Sequence
 Play images sequence in JavaScript
-Example
+
+<h2>Example html</h2>
 <pre>
-  <img class='loader' data-sequence-length='10' data-sequence-autoplay='Infinity' src='img/sequence/loader/1.png' alt=''/>
-  <img class='arrow' data-sequence-length='6' src='img/sequence/arrow/1.png' alt=''/>
+  &lt;img class='loader' data-sequence-length='10' data-sequence-autoplay='Infinity' src='img/sequence/loader/1.png' alt=''/&gt;
+  &lt;img class='arrow' data-sequence-length='6' src='img/sequence/arrow/1.png' alt=''/&gt;
 </pre>
 
+<h2>Example JS</h2>
 <pre>
   $(function() {
     Sequence.init();
