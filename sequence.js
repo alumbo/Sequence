@@ -67,10 +67,16 @@ var Sequence = {
 			this._sequenceList.push(sequence);
 		}, this));
 	},
-	play: function(id, loops) {
+	play: function(idOrEl, loops) {
 		if(loops == undefined) loops = 1;
-		var sequence = this.getSequenceById(id);
-		sequence.loops = loops;
+		if(loops === true) loops = Infinity;
+		var sequence = this.getSequenceById(idOrEl);
+		if(sequence) {
+			sequence.loops = loops;
+		}
+		else {
+			console.error('Sequence \'' + idOrEl + '\' not found');
+		}
 	},
 	stopAll: function() {
 		this.stoped = true;
@@ -95,15 +101,24 @@ var Sequence = {
 		}
 		if(!this.stoped) setTimeout($.proxy(this.frame, this), this.intervalTime);
 	},
-	getSequenceById: function(id, second) {
+	getSequenceById: function(idOrEl, second) {
+		var id = null;
+		var $el = null;
+		if(typeof idOrEl == 'string') {
+			id = idOrEl;
+		}
+		else {
+			$el = idOrEl;
+		}
 		var sequenceIndex = 0;
 		var sequenceLength = this._sequenceList.length;
 		for(; sequenceIndex < sequenceLength; sequenceIndex++) {
 			var sequence = this._sequenceList[sequenceIndex];
-			if(sequence.id == id) return sequence;
-			if(second && sequence.id == 'sequence-' + id) return sequence;
+			if($el && sequence.$container[0] == $el[0]) return sequence;
+			if(id && sequence.id == idOrEl) return sequence;
+			if(id && second && sequence.id == 'sequence-' + idOrEl) return sequence;
 		}
-		if(!second) return this.getSequenceById(id, true);
+		if(id && !second) return this.getSequenceById(idOrEl, true);
 		return null;
 	}
 };
