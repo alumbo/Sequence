@@ -1,14 +1,22 @@
 var Sequence = {
-  sequenceContainer: '<div id="{id}" class="sequence"></div>',
+  sequenceContainer: '<div {attrId} class="sequence {class}"></div>',
   imgPath: 'img/sequence/{id}/{index}.png',
-  intervalTime: 50,
+  intervalTime: 33,
   paused: false,
   _sequenceList: [],
+  isIE: false,
+  $cache: null,
   init:function(options) {
     if(options) {
       for(var optionName in options) {
         this[optionName] = options[optionName];
       }
+    }
+    var ua = navigator.userAgent;
+    this.isIE = ua.indexOf(".NET CLR") > -1 || ua.indexOf("MSIE") != -1;
+    if(this.isIE && !this.$cache) {
+      $('body').prepend('<div id="sequences-cache" style="position:absolute; top:-1000px;"></div>');
+      this.$cache = $('#sequences-cache');
     }
     this.load();
     this.frame();
@@ -45,8 +53,8 @@ var Sequence = {
       $(el).removeAttr('data-sequence-autoplay');
       $(el).removeAttr('data-sequence-length');
       $(el).removeAttr('id');
-      attrId = attrId ? id : 'sequence-' + id;
-      $(el).after(this.sequenceContainer.split('{id}').join(attrId));
+      attrId = attrId ? ('id="' + id + '"') : '';
+      $(el).after(this.sequenceContainer.split('{attrId}').join(attrId).split('{class}').join('sequence-' + id));
       var $container = $(el).next();
       $container.css('display', $(el).css('display'));
       $container.append($(el));
@@ -54,6 +62,12 @@ var Sequence = {
         var $img = $(el).clone();
         $img.attr('src', this.imgPath.split('{index}').join(indexSequence).split('{id}').join(id));
         $container.append($img);
+
+        if(this.isIE) {
+          var $clone = $img.clone();
+          $clone.attr('style', 'width:1px;height:1px;');
+          this.$cache.append($clone);
+        }
         $img.hide();
       }
       var sequence = {
@@ -89,6 +103,17 @@ var Sequence = {
       console.error('Sequence \'' + idOrEl + '\' not found');
     }
   },
+  gotoAndPlay: function(idOrEl, index) {
+    var sequence = this.getSequenceById(idOrEl);
+    if(sequence) {
+      sequence.$imgs.hide();
+      sequence.imgIndex = index;
+      sequence.loops = 1;
+    }
+    else {
+      console.error('Sequence \'' + idOrEl + '\' not found');
+    }
+  },
   stop: function(idOrEl) {
     var sequence = this.getSequenceById(idOrEl);
     if(sequence.loops > 0) sequence.loops = 1;
@@ -116,6 +141,7 @@ var Sequence = {
           sequence.imgIndex = 0;
           sequence.loops--;
         }
+        if(sequence.loops == 0) sequence.imgIndex = sequence.imgLength - 1;
         sequence.$imgs.eq(sequence.imgIndex).show();
       }
     }
