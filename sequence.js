@@ -76,6 +76,7 @@ var Sequence = {
         $imgs : $container.find('img'),
         imgLength : $container.find('img').length,
         imgIndex : 0,
+        stopAtIndex : null,
         loops : loops
       };
       this._sequenceList.push(sequence);
@@ -97,22 +98,28 @@ var Sequence = {
     if(loops == undefined) loops = 1;
     if(loops === true) loops = Infinity;
     if(sequence) {
+      sequence.stopAtIndex = null;
       sequence.loops = loops;
     }
     else {
       console.error('Sequence \'' + idOrEl + '\' not found');
     }
   },
-  gotoAndPlay: function(idOrEl, index) {
+  gotoAndPlay: function(idOrEl, index, stopAtIndex) {
     var sequence = this.getSequenceById(idOrEl);
     if(sequence) {
       sequence.$imgs.hide();
       sequence.imgIndex = index;
       sequence.loops = 1;
+      sequence.stopAtIndex = null;
+      if(stopAtIndex) sequence.stopAtIndex = stopAtIndex;
     }
     else {
       console.error('Sequence \'' + idOrEl + '\' not found');
     }
+  },
+  gotoAndStop: function(idOrEl, index) {
+    this.gotoAndPlay(idOrEl, index, index)
   },
   stop: function(idOrEl) {
     var sequence = this.getSequenceById(idOrEl);
@@ -142,6 +149,9 @@ var Sequence = {
           sequence.loops--;
         }
         if(sequence.loops == 0) sequence.imgIndex = sequence.imgLength - 1;
+        if(sequence.stopAtIndex && sequence.imgIndex > sequence.stopAtIndex ) {
+          sequence.imgIndex = sequence.stopAtIndex;
+        }
         sequence.$imgs.eq(sequence.imgIndex).show();
       }
     }
